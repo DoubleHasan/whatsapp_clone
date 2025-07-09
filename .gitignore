@@ -1,0 +1,56 @@
+# Android specific
+*.iml
+.gradle/
+local.properties
+/.idea/caches
+/.idea/libraries
+/.idea/modules.xml
+/.idea/workspace.xml
+/.idea/navEditor.xml
+/.idea/assetWizardSettings.xml
+/.idea/gradle.xml
+/.idea/misc.xml
+.DS_Store
+/build/
+/captures/
+/.externalNativeBuild/
+
+# Kotlin
+*.class
+*.kt~
+*.kts~
+
+# Firebase
+firebase-debug.log
+firebase.json
+
+# Google Services
+google-services.json
+# If you use Crashlytics, keep this
+crashlytics-build.properties
+
+# Sign-in keys
+*.jks
+*.keystore
+
+# Gradle
+.gradle/
+build/
+**/build/
+!gradle-wrapper.jar
+gradle-wrapper.properties
+gradle-wrapper.jar
+
+# Log files
+*.log
+
+# Other
+.idea/
+*.apk
+*.ap_
+
+# MacOS
+*.DS_Store
+
+# Windows
+Thumbs.db
