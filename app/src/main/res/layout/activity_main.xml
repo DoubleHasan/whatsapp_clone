@@ -14,13 +14,13 @@
         android:id="@+id/my_toolbar"
         android:layout_width="match_parent"
         android:layout_height="64dp"
-        android:background="#B4B4B6"
+        android:background="#FFFFFF"
         android:gravity="center"
         android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:titleTextColor="@android:color/white">
+        app:titleTextColor="#25D366">
     </androidx.appcompat.widget.Toolbar>
     <androidx.fragment.app.FragmentContainerView
         android:id="@+id/fragmentContainerView"
