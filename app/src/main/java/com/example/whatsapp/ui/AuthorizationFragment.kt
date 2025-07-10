@@ -7,6 +7,8 @@ import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.ui.graphics.BlendMode.Companion.Color
+import androidx.compose.ui.graphics.Color
 import androidx.core.content.edit
 import androidx.core.view.isVisible
 import androidx.navigation.fragment.findNavController
@@ -33,6 +35,7 @@ class AuthorizationFragment : BaseFragment<FragmentAuthorizationBinding>() {
         super.onViewCreated(view, savedInstanceState)
         (requireActivity() as AppCompatActivity).supportActionBar?.show()
         binding.ccp.registerCarrierNumberEditText(binding.etNumber)
+        binding.ccp.setBackgroundColor(android.graphics.Color.WHITE)
 
         binding.ivNext.setOnClickListener {
             binding.tvCountryCode.text = ""

@@ -14,9 +14,12 @@ import java.text.SimpleDateFormat
 import java.util.Locale
 import javax.inject.Inject
 
-class MessageAdapter @Inject constructor(var auth: FirebaseAuth) :
+class MessageAdapter @Inject constructor(
+    var auth: FirebaseAuth,
+    var onLongClick: (String) -> Unit
+) :
     RecyclerView.Adapter<MessageViewHolder>() {
-    var messageList: List<Message> = emptyList()
+    var messageList: List<Pair<String, Message>> = emptyList()
     private val currentId = auth.currentUser?.uid
     override fun onCreateViewHolder(
         parent: ViewGroup,
@@ -30,8 +33,12 @@ class MessageAdapter @Inject constructor(var auth: FirebaseAuth) :
         holder: MessageViewHolder,
         position: Int
     ) {
-        val currentMessage = messageList[position]
+        val (id, currentMessage) = messageList[position]
         val date = currentMessage.timestamp?.toDate()
+        holder.binding.tvMessage.setOnLongClickListener {
+            onLongClick(id)
+            true
+        }
         val formatter = SimpleDateFormat("HH:mm", Locale.getDefault())
         holder.binding.tvTime.text = if (date != null) {
             formatter.format(date)
@@ -89,7 +96,7 @@ class MessageAdapter @Inject constructor(var auth: FirebaseAuth) :
         return messageList.size
     }
 
-    fun setList(newlist: List<Message>) {
+    fun setList(newlist: List<Pair<String,Message>>) {
         messageList = newlist
         notifyDataSetChanged()
     }

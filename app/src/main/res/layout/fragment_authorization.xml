@@ -102,6 +102,7 @@
                 android:layout_height="wrap_content"
                 android:background="@android:color/transparent"
                 android:hint="phone number"
+                android:textColorHint="#5F5E5E"
                 android:inputType="phone"
                 android:paddingStart="25dp"
                 android:textColor="@color/black"

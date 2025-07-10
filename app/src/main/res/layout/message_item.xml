@@ -19,7 +19,7 @@
         android:fontFamily="@font/roboto"
         android:gravity="start"
         android:maxLines="100"
-        android:padding="12dp"
+        android:padding="6dp"
         android:text="Hello"
         android:textSize="20sp"
         app:layout_constraintStart_toStartOf="parent"
