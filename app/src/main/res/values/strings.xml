@@ -5,4 +5,7 @@
     <string name="message">Message</string>
     <string name="search_a_name">Search a name</string>
     <string name="please_confirm_your_country_code_and_enter_your_phone_number">Please confirm your country code and enter your phone number</string>
+    <string name="search">Search</string>
+    <string name="settings">Settings</string>
+    <string name="delete">Delete</string>
 </resources>

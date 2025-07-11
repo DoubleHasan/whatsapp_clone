@@ -2,11 +2,17 @@ package com.example.whatsapp.ui
 
 import android.content.SharedPreferences
 import android.os.Bundle
+import android.view.Menu
+import android.graphics.Color
+import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.MenuHost
+import androidx.core.view.MenuProvider
+import androidx.lifecycle.Lifecycle
 import androidx.navigation.fragment.navArgs
 import com.example.whatsapp.Message
 import com.example.whatsapp.R
@@ -27,73 +33,91 @@ class ChatFragment : BaseFragment<FragmentChatBinding>() {
     @Inject
     lateinit var firestore: FirebaseFirestore
 
-    lateinit var adapter: MessageAdapter
-
     @Inject
     lateinit var auth: FirebaseAuth
 
-    lateinit var chatId: String
+    private lateinit var adapter: MessageAdapter
+    private lateinit var chatId: String
+    private var deleteMenuItem: MenuItem? = null
+    private var messageId: String? = null
+    private var messageView: View? = null
+
     override fun getViewBinding(): FragmentChatBinding {
         return FragmentChatBinding.inflate(layoutInflater)
     }
 
-    fun onMenuItemSelected(menuItem: MenuItem): Boolean {
-        return when (menuItem.itemId) {
-            R.id.delete -> {
-
-                true
-            }
-
-            else -> false
-        }
-    }
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
         val args: ChatFragmentArgs by navArgs()
-        (requireActivity() as AppCompatActivity).supportActionBar!!.title =
-            sharedPreferences.getString("Name", "")
         val receiverId = args.uid
-        val senderId = auth.currentUser?.uid
-        chatId = getChatId(receiverId, senderId!!)
+        val senderId = auth.currentUser?.uid!!
+        chatId = getChatId(receiverId, senderId)
+        val menuHost: MenuHost = requireActivity()
+        menuHost.addMenuProvider(object : MenuProvider {
+            override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
+                menuInflater.inflate(R.menu.chat_item, menu)
+                deleteMenuItem = menu.findItem(R.id.delete)
+                deleteMenuItem?.isVisible = false
+            }
 
-        adapter = MessageAdapter(auth) { messageId ->
-            AlertDialog.Builder(requireContext())
-                .setTitle("Delete Message")
-                .setMessage("Do you want to delete it?")
-                .setPositiveButton("Yes") { dialog, _ ->
-                    firestore.collection("chats").document(chatId)
-                        .collection("messages").document(messageId)
-                        .delete()
-                }
-                .setNegativeButton("No") { dialog, _ ->
-                    dialog.dismiss()
-                }
-                .show()
+            override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
+                return when (menuItem.itemId) {
+                    R.id.delete -> {
+                        val id = messageId
+                        val view = messageView
+                        if (id != null && view != null) {
+                            val dialog = AlertDialog.Builder(requireContext())
+                                .setTitle("Delete Message")
+                                .setMessage("Do you want to delete it?")
+                                .setPositiveButton("Yes") { _, _ ->
+                                    firestore.collection("chats").document(chatId)
+                                        .collection("messages").document(id)
+                                        .delete()
+                                    view.setBackgroundColor(Color.TRANSPARENT)
+                                    messageId = null
+                                    messageView = null
+                                    deleteMenuItem?.isVisible = false
+                                }
+                                .setNegativeButton("No") { dialog, _ ->
+                                    dialog.dismiss()
+                                }
+                                .create()
+                            dialog.setOnDismissListener {
+                                view.setBackgroundColor(Color.TRANSPARENT)
+                            }
+                            dialog.show()
+                        }
+                        true
+                    }
 
+                    else -> false
+                }
+            }
+        }, viewLifecycleOwner, Lifecycle.State.RESUMED)
+
+        adapter = MessageAdapter(auth) { messageId, rootView ->
+            this@ChatFragment.messageId = messageId
+            messageView = rootView
+            rootView.setBackgroundColor(Color.LTGRAY)
+            deleteMenuItem?.isVisible = true
         }
+
         binding.rvMessages.adapter = adapter
 
         firestore.collection("chats").document(chatId)
             .collection("messages").orderBy("timestamp")
-            .addSnapshotListener()
-            { snapshot, error ->
+            .addSnapshotListener { snapshot, _ ->
                 val messageList = snapshot?.documents?.mapNotNull {
-                    val message =
-                        it.toObject(Message::class.java)
-
-                    if (message != null) {
-                        it.id to message
-                    } else
-                        null
+                    val message = it.toObject(Message::class.java)
+                    if (message != null) it.id to message else null
                 } ?: emptyList()
 
                 adapter.setList(messageList)
                 binding.rvMessages.scrollToPosition(messageList.size - 1)
             }
 
-        binding.btnSend.setOnClickListener()
-        {
+        binding.btnSend.setOnClickListener {
             val message = binding.etMessage.text.toString()
             val messageData = hashMapOf(
                 "senderId" to senderId,
@@ -102,15 +126,18 @@ class ChatFragment : BaseFragment<FragmentChatBinding>() {
                 "timestamp" to FieldValue.serverTimestamp()
             )
 
-            firestore.collection("chats").document(chatId).collection("messages").add(messageData)
+            firestore.collection("chats").document(chatId)
+                .collection("messages").add(messageData)
                 .addOnSuccessListener {
                     binding.etMessage.setText("")
                 }
                 .addOnFailureListener {
-                    Toast.makeText(requireContext(), "Failed to send message", Toast.LENGTH_SHORT)
-                        .show()
+                    Toast.makeText(requireContext(), "Failed to send", Toast.LENGTH_SHORT).show()
                 }
         }
+
+        (requireActivity() as AppCompatActivity).supportActionBar?.title =
+            sharedPreferences.getString("Name", "")
     }
 
     private fun getChatId(uid1: String, uid2: String): String {

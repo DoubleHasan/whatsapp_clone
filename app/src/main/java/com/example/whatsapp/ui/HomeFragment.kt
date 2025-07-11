@@ -13,6 +13,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
 import androidx.core.content.ContextCompat
+import androidx.core.content.edit
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.example.whatsapp.Contact
@@ -90,6 +91,7 @@ class HomeFragment : BaseFragment<FragmentMainBinding>() {
 
         adapter = ContactAdapter { person ->
             val normalPhoneNumber = normalizePhone(person.number.toString())
+            sharedPreferences.edit { putString("Name",person.name) }
             firestore.collection("users")
                 .whereEqualTo("number", normalPhoneNumber)
                 .get()
@@ -99,7 +101,6 @@ class HomeFragment : BaseFragment<FragmentMainBinding>() {
                         val uid = document.getString("uid")
                         val currentUser = auth.currentUser
                         chatId = getChatId(currentUser!!.uid, uid.toString())
-                        Toast.makeText(requireContext(), "User is found successfully", Toast.LENGTH_SHORT).show()
                         findNavController().navigate(
                             HomeFragmentDirections.actionMainFragmentToChatFragment(uid.toString())
                         )

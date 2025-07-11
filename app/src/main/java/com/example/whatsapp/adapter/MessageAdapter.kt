@@ -4,6 +4,7 @@ import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.graphics.Color
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.recyclerview.widget.RecyclerView
 import com.example.whatsapp.Message
@@ -13,10 +14,11 @@ import com.example.whatsapp.R
 import java.text.SimpleDateFormat
 import java.util.Locale
 import javax.inject.Inject
+import androidx.core.graphics.toColorInt
 
 class MessageAdapter @Inject constructor(
     var auth: FirebaseAuth,
-    var onLongClick: (String) -> Unit
+    var onLongClick: (String, ConstraintLayout) -> Unit
 ) :
     RecyclerView.Adapter<MessageViewHolder>() {
     var messageList: List<Pair<String, Message>> = emptyList()
@@ -33,12 +35,16 @@ class MessageAdapter @Inject constructor(
         holder: MessageViewHolder,
         position: Int
     ) {
+        val binding = holder.binding
         val (id, currentMessage) = messageList[position]
         val date = currentMessage.timestamp?.toDate()
         holder.binding.tvMessage.setOnLongClickListener {
-            onLongClick(id)
+            onLongClick(id,holder.binding.root)
+            holder.binding.root.setBackgroundColor("#D0F8CE".toColorInt())
             true
         }
+        binding.root.setOnClickListener { binding.root.setBackgroundColor(Color.TRANSPARENT) }
+
         val formatter = SimpleDateFormat("HH:mm", Locale.getDefault())
         holder.binding.tvTime.text = if (date != null) {
             formatter.format(date)
