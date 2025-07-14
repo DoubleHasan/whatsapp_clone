@@ -17,6 +17,7 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         supportActionBar?.hide()
         super.onCreate(savedInstanceState)
+
         enableEdgeToEdge()
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -28,6 +29,16 @@ class MainActivity : AppCompatActivity() {
 
         val appBarConfiguration = AppBarConfiguration(navController.graph)
         setupActionBarWithNavController(navController, appBarConfiguration)
+
+        val isLoggedIn = intent.getBooleanExtra("isLoggedIn", false)
+
+        if (!isLoggedIn) {
+            navController.navigate(R.id.authorizationFragment)
+        }
+        else
+        {
+            navController.navigate(R.id.homeFragment)
+        }
     }
 
     override fun onSupportNavigateUp(): Boolean {
